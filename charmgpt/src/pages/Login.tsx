@@ -21,14 +21,43 @@ const Login = () => {
     setIsLoaded(true);
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Login attempt:", formData);
-    toast({
-      title: "Welcome Back to Charm!",
-      description: "Your conversation mastery journey continues...",
-    });
-    navigate("/chat");
+  
+    try {
+      const response = await fetch("http://localhost:8080/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password
+        })
+      });
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(data.error || "Login failed");
+      }
+  
+      // Store token if needed
+      localStorage.setItem("token", data.token);
+  
+      toast({
+        title: "Welcome Back to Charm!",
+        description: "Your conversation mastery journey continues...",
+      });
+  
+      navigate("/chat");
+    } catch (error: any) {
+      toast({
+        title: "Login Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   const features = [

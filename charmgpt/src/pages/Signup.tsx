@@ -24,8 +24,9 @@ const Signup = () => {
     setIsLoaded(true);
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+  
     if (formData.password !== formData.confirmPassword) {
       toast({
         title: "Password Mismatch",
@@ -34,12 +35,39 @@ const Signup = () => {
       });
       return;
     }
-    console.log("Signup attempt:", formData);
-    toast({
-      title: "Welcome to Charm!",
-      description: "Your journey to communication mastery begins now",
-    });
-    navigate("/chat");
+  
+    try {
+      const response = await fetch("http://localhost:8080/api/auth/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password
+        })
+      });
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(data.error || "Signup failed");
+      }
+  
+      toast({
+        title: "Account Created!",
+        description: "You're ready to charm the world",
+      });
+  
+      navigate("/login");
+    } catch (error: any) {
+      toast({
+        title: "Signup Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   const benefits = [
