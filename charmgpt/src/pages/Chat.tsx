@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import { Heart, Send, Settings, BookOpen, Plus, Sparkles, User, Bot } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-
+import { fetchAIResponse } from "@/lib/api";
 interface Message {
   id: string;
   text: string;
@@ -28,30 +28,39 @@ const Chat = () => {
 
   const handleSendMessage = async () => {
     if (!input.trim()) return;
-
+  
     const userMessage: Message = {
       id: Date.now().toString(),
       text: input,
       sender: "user",
       timestamp: new Date()
     };
-
+  
     setMessages(prev => [...prev, userMessage]);
     const currentInput = input;
     setInput("");
     setIsGenerating(true);
-
-    // Simulate AI response with selected type
-    setTimeout(() => {
+  
+    const messageHistory = messages.map(m => ({
+      role: m.sender as "user" | "assistant",
+      content: m.text
+    }));
+  
+    try {
+      const aiText = await fetchAIResponse(messageHistory, currentInput, responseType);
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: `Here's a ${responseType} response to "${currentInput}". I can help you craft the perfect message that's engaging and authentic. Would you like me to suggest some different approaches - perhaps something more flirty, witty, or romantic?`,
+        text: aiText,
         sender: "assistant",
         timestamp: new Date()
       };
       setMessages(prev => [...prev, aiMessage]);
+    } catch (err) {
+      console.error("AI fetch failed", err);
+      toast({ title: "Error", description: "Failed to get response. Try again!" });
+    } finally {
       setIsGenerating(false);
-    }, 1500);
+    }
   };
 
   const newChat = () => {
