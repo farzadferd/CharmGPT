@@ -20,7 +20,7 @@ export const fetchAIResponse = async (
 ): Promise<string> => {
   const systemPrompt: ChatMessage = {
     role: "system",
-    content: `You are CharmGPT, an AI texting coach. Your job is to help users craft confident, playful, and charismatic responses to text messages. Match the tone: ${tone}.`
+    content: `You are Charm, an AI texting coach. Your job is to help users craft responses to text messages while matching the corresponding tone: ${tone} that the user selected. Match the tone: ${tone}.`
   };
 
   const messages = [
